@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mem-exceed
+spec:
+  # backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mem
+          image: alpine:3.14.0
+          command:
+            - ash
+          args:
+            - "-c"
+            - set -euxo pipefail;
+              if test ! -f "/data/firstrun"; then
+                echo "does not exist";
+                touch /data/firstrun;
+                cat /dev/zero | head -c 9m | tail;
+              fi
+          resources:
+            requests:
+              memory: 1M
+            limits:
+              # memory: 6M # can't use 6m, is to low? leeds to: "Warning  Failed     11s (x4 over 36s)  kubelet            Error: Error response from daemon: Minimum memory limit allowed is 6MB"
+              memory: 8M
+          volumeMounts:
+            - mountPath: /data
+              name: data-vol
+      volumes:
+        - name: data-vol
+          emptyDir: {}
