@@ -1,0 +1,56 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: test-nginx
+spec:
+  rules:
+    - host: "example.io"
+      http:
+        paths:
+          - backend:
+              service:
+                name: test-nginx
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - "example.io"
+      secretName: "my-tls-secret"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-nginx
+spec:
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: test-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-nginx
+  labels:
+    app: test-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-nginx
+  template:
+    metadata:
+      labels:
+        app: test-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.23.3-alpine
+        ports:
+        - containerPort: 80
