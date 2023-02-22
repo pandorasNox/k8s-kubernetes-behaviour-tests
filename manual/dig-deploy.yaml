@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-dig
+  labels:
+    app: test-dig
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-dig
+  template:
+    metadata:
+      labels:
+        app: test-dig
+    spec:
+      containers:
+      - name: dig
+        image: alpine:3.17.2
+        command:
+          - ash
+        args:
+          - -c
+          # bind-tools for dig
+          - "apk add --update bind-tools curl; sleep infinity"
